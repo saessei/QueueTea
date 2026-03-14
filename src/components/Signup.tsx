@@ -40,7 +40,7 @@ export const Signup = () => {
         <h2 className="font-bold pb-2 text-center">Sign up</h2>
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link className="text-blue-600 hover:underline" to="/">
+          <Link className="text-blue-600 hover:underline" to="/signin">
             Sign in
           </Link>
         </p>
@@ -73,3 +73,5 @@ export const Signup = () => {
     </div>
   );
 };
+
+export default Signup;
