@@ -1,13 +1,17 @@
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import  supabase  from "../config/supabaseClient.ts";
-import {  User, Session, WeakPassword } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
-    session: any;
+    session: Session | null;
     signUpNewUser: (email: string, password: string) => Promise<{ success: boolean; data?: any; error?: any }>;
     signOut: () => Promise<void>;
-    signInUser: (email: string, password: string) => Promise<{ success: boolean; error: string; data?: undefined; } | { success: boolean; data: { user: User; session: Session; weakPassword?: WeakPassword; }; error?: undefined; } | undefined>;
+    signInUser: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
 }
+
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -16,7 +20,7 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({children}: AuthProviderProps) => {
-    const [ session, setSession ] = useState<any>(null);
+    const [ session, setSession ] = useState<Session | null>(null);
 
     // Sign up
     const signUpNewUser = async (email: string, password: string) => {
@@ -47,7 +51,8 @@ export const AuthContextProvider = ({children}: AuthProviderProps) => {
             console.log("Sign in success: ", data);
             return {success: true, data};
         } catch(error) {
-            console.error("An error occured: ", error)
+            console.error("An error occured: ", error);
+            return { success: false, error: "Unexpected error" };
         }
 
     }
