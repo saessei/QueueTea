@@ -6,18 +6,18 @@ export default {
   ],
   theme: {
     extend: {
-      colors:{
-        'bg-cream': '#FFF8F0',
+      colors: {
+        'cream': '#FFF8F0',
         'dark-brown': '#4B2E2B',
+        'brown-two': '#8C5A3C',
         'brown': '#C08552',
         'bg-lightgray': '#F5F5F4',
         'text-gray': '#807975',
         'button-gray': '#ECE7E4'
-
       },
       fontFamily: {
-        fredoka: ['"Fredoka"', 'sans-serif'],
-        quicksand: ['"Quicksand"', 'sans-serif']
+        fredoka: ['Fredoka', 'sans-serif'],
+        quicksand: ['Quicksand', 'sans-serif']
       }
     },
   },

@@ -35,7 +35,7 @@ export const Signin = () => {
     <div className="flex items-center justify-center min-h-screen">
       <form
         onSubmit={handleSignIn}
-        className="max-w-md w-full p-8 rounded-lg shadow-lg"
+        className="max-w-md w-full p-8 rounded-lg shadow-lg bg-white"
       >
         <h2 className="font-bold pb-2 text-center">Sign in</h2>
         <p className="text-center text-sm text-gray-600">
