@@ -5,3 +5,11 @@
 @tailwind utilities;
 
 
+index.css
+.boba-pattern {
+  background-image: url('./assets/pearl.png'); 
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 80px; 
+  height: 200px; 
+}

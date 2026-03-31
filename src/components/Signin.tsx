@@ -32,7 +32,7 @@ export const Signin = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-cream">
       <form
         onSubmit={handleSignIn}
         className="max-w-md w-full p-8 rounded-lg shadow-lg bg-white"
