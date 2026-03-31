@@ -26,7 +26,7 @@ export const Signup = () => {
       const result = await signUpNewUser(email, password);
 
       if (result.success) {
-        navigate("/dashboard");
+        navigate("/dashboard", { state: { userName: name } });
       }
     } catch (error) {
       setError("An error occured.");
