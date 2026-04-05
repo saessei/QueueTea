@@ -1,11 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  /* --- Colors from your config --- */
+  --color-cream: #FFF8F0;
+  --color-dark-brown: #4B2E2B;
+  --color-brown-two: #8C5A3C;
+  --color-brown: #C08552;
+  --color-bg-lightgray: #F5F5F4;
+  --color-text-gray: #807975;
+  --color-button-gray: #ECE7E4;
 
+  /* --- Fonts from your config --- */
+  --font-fredoka: "Fredoka", sans-serif;
+  --font-quicksand: "Quicksand", sans-serif;
+}
 
-index.css
+/* --- Custom Utility Classes --- */
 .boba-pattern {
   background-image: url('./assets/pearl.png'); 
   background-repeat: repeat-x;
