@@ -28,7 +28,7 @@ export const Sidebar = () => {
     { name: "Kiosk Mode", icon: <Store size={20} />, path: "/dashboard" },
     { name: "Queued Orders", icon: <List size={20} />, path: "/dashboard" },
     { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
-    { name: "Settings", icon: <Settings size={20} />, path: "/dashboard" },
+    { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 
   const handleSignOut = async () => {
