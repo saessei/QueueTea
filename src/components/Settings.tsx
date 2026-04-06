@@ -25,13 +25,19 @@ export const Settings = () => {
   }, [session]);
 
   const handleUpdateName = async () => {
-    try {
-      await profileService.updateName(user.id, name);
-      console.log("Name updated successfully!");
-    } catch (err) {
-      console.log("Update failed");
-    }
-  };
-  
+    if (!session?.user?.id) {
+    console.error("No user found!");
+    return;
+  }
+
+  try {
+    await profileService.updateName(session.user.id, name);
+    console.log("Name updated successfully!");
+    alert("Name updated!"); 
+  } catch (err) {
+    console.error("Update failed:", err);
+  }
+};
+
   return <div>Settings</div>;
 };
