@@ -91,7 +91,6 @@ interface CartItem {
 
 export const Dashboard = () => {
   const { session } = UserAuth();
-  const navigate = useNavigate();
 
   const userName =
     session?.user?.user_metadata?.display_name ||
