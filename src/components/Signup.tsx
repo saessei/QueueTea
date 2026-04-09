@@ -29,7 +29,7 @@ export const Signup = () => {
       const result = await signUpNewUser(email, password, name);
 
       if (result.success) {
-        navigate("/dashboard");
+        navigate("/kiosk");
       } else {
         setError(result.error || "An error occurred.");
       }

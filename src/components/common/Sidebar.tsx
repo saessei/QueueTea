@@ -25,8 +25,8 @@ export const Sidebar = () => {
   }, []);
 
   const sidebarItems = [
-    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/dashboard" },
-    { name: "Queued Orders", icon: <List size={20} />, path: "/dashboard" },
+    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
+    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
     { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];

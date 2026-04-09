@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Trash, Plus } from "lucide-react";
 import { UserAuth } from "../context/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
 import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
+import { createOrder } from "../utils/orders";
 
 // Strategy pattern
 interface CustomizationStrategy {
@@ -35,7 +38,7 @@ interface CartItem {
   toppings: string[];
 }
 
-export const Dashboard = () => {
+export const Kiosk = () => {
   const { session } = UserAuth();
 
   const userName =
@@ -57,6 +60,23 @@ export const Dashboard = () => {
 
   const [sugarLevel, setSugarLevel] = useState(sugarStrategy.options[2]);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('kioskCart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Failed to load cart from localStorage:', error);
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('kioskCart', JSON.stringify(cart));
+  }, [cart]);
 
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
@@ -95,7 +115,25 @@ export const Dashboard = () => {
   };
 
   const removeItem = (index: number) => {
-    setCart((prev) => prev.filter((_, i) => i !== index));
+    setCart((prev) => prev.map((item, i) => {
+      if (i === index) {
+        if (item.quantity > 1) {
+          return { ...item, quantity: item.quantity - 1 };
+        } else {
+          return null; // will be filtered out
+        }
+      }
+      return item;
+    }).filter(Boolean) as CartItem[]);
+  };
+
+  const increaseItem = (index: number) => {
+    setCart((prev) => prev.map((item, i) => {
+      if (i === index) {
+        return { ...item, quantity: item.quantity + 1 };
+      }
+      return item;
+    }));
   };
 
   const cartTotal = cart.reduce((sum, item) => {
@@ -107,6 +145,34 @@ export const Dashboard = () => {
     setSelectedToppings((prev) =>
       prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping],
     );
+  };
+
+  const navigate = useNavigate();
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+
+    const orderDetails = cart
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.drink.name} (${item.sugar}${
+            item.toppings.length > 0 ? `, ${item.toppings.join(", ")}` : ""
+          })`,
+      )
+      .join(" • ");
+
+    try {
+      await createOrder({
+        customer_name: userName,
+        order_details: orderDetails,
+        status: "pending",
+      });
+      setCart([]);
+      localStorage.removeItem('kioskCart');
+      navigate("/queued-orders");
+    } catch (error) {
+      console.error("Failed to send order to queue:", error instanceof Error ? error.message : error);
+    }
   };
 
   return (
@@ -138,9 +204,22 @@ export const Dashboard = () => {
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Sugar: {item.sugar}</p>
                   <p className="text-xs text-gray-500">Toppings: {item.toppings.length > 0 ? item.toppings.join(", ") : "None"}</p>
-                  <button onClick={() => removeItem(idx)} className="mt-2 text-xs text-red-500 hover:underline">
-                    Remove
-                  </button>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => removeItem(idx)}
+                      className="flex items-center justify-center rounded-full p-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors cursor-pointer"
+                    >
+                      <Trash size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => increaseItem(idx)}
+                      className="flex items-center justify-center rounded-full p-2 bg-green-100 text-green-600 hover:bg-green-200 transition-colors cursor-pointer"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
                 </div>
               );
             })
@@ -150,7 +229,12 @@ export const Dashboard = () => {
         <div className="mt-6 border-t pt-4">
           <p className="text-sm text-gray-500">Subtotal</p>
           <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
-          <button className="mt-4 w-full rounded-xl bg-dark-brown px-4 py-2 text-white disabled:opacity-50" disabled={cart.length === 0}>
+          <button
+            type="button"
+            onClick={handleCheckout}
+            className="mt-4 w-full rounded-xl bg-dark-brown px-4 py-2 text-white disabled:opacity-50 cursor-pointer"
+            disabled={cart.length === 0}
+          >
             Check Out
           </button>
         </div>
@@ -163,9 +247,9 @@ export const Dashboard = () => {
         </div>
 
         <div className="mb-6 flex items-center gap-3">
-          <button className="rounded-full px-5 py-2 bg-dark-brown text-white">Milktea</button>
-          <button className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600">Coffee</button>
-          <button className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600">Snacks</button>
+          <button type="button" className="rounded-full px-5 py-2 bg-dark-brown text-white cursor-pointer">Milktea</button>
+          <button type="button" className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600 cursor-pointer">Coffee</button>
+          <button type="button" className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600 cursor-pointer">Snacks</button>
         </div>
 
         <section className="grid lg:grid-cols-2 xl:grid-cols-2 gap-5">
@@ -186,8 +270,9 @@ export const Dashboard = () => {
                 <p className="mt-3 text-2xl font-extrabold">₱{drink.price.toFixed(2)}</p>
               </div>
               <button
+                type="button"
                 onClick={() => openCustomization(drink)}
-                className="mt-4 w-full rounded-xl bg-brown text-white py-3 font-semibold hover:bg-brown-dark transition-colors"
+                className="mt-4 w-full rounded-xl bg-brown text-white py-3 font-semibold hover:bg-brown-dark transition-colors cursor-pointer"
               >
                 + Add to Order
               </button>
@@ -207,8 +292,9 @@ export const Dashboard = () => {
                 onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
               />
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white"
+                className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white cursor-pointer"
               >
                 ✕
               </button>
@@ -233,7 +319,7 @@ export const Dashboard = () => {
                         key={option}
                         type="button"
                         onClick={() => toggleTopping(option)}
-                        className={`rounded-xl px-3 py-2 text-sm border font-semibold ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"}`}
+                        className={`rounded-xl px-3 py-2 text-sm border font-semibold ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"} cursor-pointer`}
                       >
                         {option} (+₱{toppingStrategy.priceAdjustment(option)})
                       </button>
@@ -252,7 +338,7 @@ export const Dashboard = () => {
                         key={option}
                         type="button"
                         onClick={() => setSugarLevel(option)}
-                        className={`text-xs rounded-full px-3 py-2 font-semibold border ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"}`}
+                        className={`text-xs rounded-full px-3 py-2 font-semibold border ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"} cursor-pointer`}
                       >
                         {option}
                       </button>
@@ -263,14 +349,16 @@ export const Dashboard = () => {
 
               <div className="flex justify-end gap-3">
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2 rounded-xl border border-slate-300 text-sm font-semibold hover:bg-slate-100"
+                  className="px-5 py-2 rounded-xl border border-slate-300 text-sm font-semibold hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={addToCart}
-                  className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark"
+                  className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark cursor-pointer"
                 >
                   Add to Cart
                 </button>

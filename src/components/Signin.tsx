@@ -27,7 +27,7 @@ export const Signin = () => {
       const result = await signInUser(email, password);
 
       if (result.success) {
-        navigate("/dashboard");
+        navigate("/kiosk");
       } else {
         if (result.error?.toLowerCase().includes("invalid login credentials")) {
           setError("Invalid email or password. Please try again.");
