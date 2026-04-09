@@ -2,6 +2,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { Signup } from "../components/Signup";
 import { AuthContext } from "../context/AuthContext";
 import { BrowserRouter } from "react-router-dom";
+import { within, userEvent, expect } from "@storybook/test";
 
 const MockProviders = ({ children, authValue }: any) => (
   <BrowserRouter>
@@ -12,7 +13,7 @@ const MockProviders = ({ children, authValue }: any) => (
 );
 
 const meta: Meta<typeof Signup> = {
-  title: "Pages/Signin",
+  title: "Pages/Signup",
   component: Signup,
   parameters: {
     layout: "fullscreen",
@@ -29,7 +30,7 @@ const fillForm = async (canvasElement: HTMLElement) => {
   const nameInput = canvas.getByPlaceholderText("Name");
   const emailInput = canvas.getByPlaceholderText("Email");
   const passwordInput = canvas.getByPlaceholderText("Password");
-  const submitButton = canvas.getByRole("button", { name: /sign in/i });
+  const submitButton = canvas.getByRole("button", { name: /sign up/i });
 
   // Simulate typing
   await userEvent.type(emailInput, "boba.lover@example.com", { delay: 50 });
