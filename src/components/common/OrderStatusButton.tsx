@@ -18,7 +18,7 @@ export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
   return (
     <div>
       <button
-        className={`${color} ${text} cursor-pointer rounded-2xl font-quicksand px-4 py-2`}
+        className={`${color} ${text} cursor-pointer rounded-2xl font-quicksand font-bold px-4 py-2`}
         onClick={onClick}
       >
         {label}

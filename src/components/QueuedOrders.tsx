@@ -17,9 +17,7 @@ export const QueuedOrders = () => {
     session?.user?.user_metadata?.display_name ||
     session?.user?.email?.split("@")[0] ||
     "Guest";
-    
-  const baristaName = userName;
-
+  
   const incomingOrders = orders.filter((order) => order.status === "pending");
   const preparingOrders = orders.filter((order) => order.status === "preparing");
   const completedOrders = orders.filter((order) => order.status === "completed");

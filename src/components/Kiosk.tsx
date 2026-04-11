@@ -267,8 +267,6 @@ export const Kiosk = () => {
 
         <div className="mb-6 flex items-center gap-3">
           <button type="button" className="rounded-full px-5 py-2 bg-dark-brown text-white cursor-pointer">Milktea</button>
-          <button type="button" className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600 cursor-pointer">Coffee</button>
-          <button type="button" className="rounded-full px-5 py-2 bg-white border border-slate-200 text-slate-600 cursor-pointer">Snacks</button>
         </div>
 
         <section className="grid lg:grid-cols-2 xl:grid-cols-2 gap-5">
