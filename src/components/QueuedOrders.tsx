@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "./common/Sidebar";
 import { useOrders } from "../hooks/useOrders";
-import { updateOrderStatus } from "../utils/orders";
+import { updateOrderStatus } from "../services/orders";
 import { OrderStatusButton } from "./common/OrderStatusButton";
 import { UserAuth } from "../context/AuthContext";
 

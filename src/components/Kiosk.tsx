@@ -5,7 +5,7 @@ import { UserAuth } from "../context/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
 import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
-import { createOrder } from "../utils/orders";
+import { createOrder } from "../services/orders";
 
 // Strategy pattern
 interface CustomizationStrategy {
