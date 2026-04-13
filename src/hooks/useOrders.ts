@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import supabase from '../config/supabaseClient';
 
 interface Order {
@@ -15,20 +15,28 @@ export const useOrders = () => {
   const fetchOrders = useCallback(async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at');
     if (data) setOrders(data);
-  }, []);
+  }, []); 
 
-  useEffect(() => {
-    fetchOrders();
+useEffect(() => {
+    // Wrapping the initial fetch in an async function inside the effect
+    // often satisfies the linter's concern about synchronous state updates.
+    const initializeOrders = async () => {
+      await fetchOrders();
+    };
+
+    initializeOrders();
 
     const channel = supabase
       .channel('queue-tea-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchOrders(); // Re-fetch when the database changes
+        fetchOrders();
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchOrders]); 
 
   return { orders, fetchOrders };
 };

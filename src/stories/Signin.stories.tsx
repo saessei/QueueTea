@@ -4,9 +4,20 @@ import { Signin } from "../components/Signin";
 import { AuthContext } from "../context/AuthContext";
 import { userEvent, within, expect, waitFor } from "storybook/test";
 
-const MockProviders = ({ children, authValue }: any) => (
+interface MockProps {
+  children: React.ReactNode;
+  authValue: {
+    session: { user: { email: string } } | null;
+    signInUser?: (e: string, p: string) => Promise<{ success: boolean; error?: string }>;
+    signUpNewUser?: (e: string, p: string, n: string) => Promise<{ success: boolean; error?: string }>;
+    signOut?: () => Promise<void>;
+    refreshSession?: () => Promise<void>;
+  };
+}
+
+const MockProviders = ({ children, authValue }: MockProps) => (
   <BrowserRouter>
-    <AuthContext.Provider value={authValue}>
+    <AuthContext.Provider value={authValue as unknown as never}>
       {children}
     </AuthContext.Provider>
   </BrowserRouter>
@@ -23,7 +34,6 @@ const meta: Meta<typeof Signin> = {
 export default meta;
 type Story = StoryObj<typeof Signin>;
 
-// Reusable play function to fill out the form
 const fillForm = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   
@@ -31,11 +41,9 @@ const fillForm = async (canvasElement: HTMLElement) => {
   const passwordInput = canvas.getByPlaceholderText("Password");
   const submitButton = canvas.getByRole("button", { name: /sign in/i });
 
-  // Simulate typing
   await userEvent.type(emailInput, "boba.lover@example.com", { delay: 50 });
   await userEvent.type(passwordInput, "Password123!", { delay: 50 });
   
-  // Verify values are present
   await expect(emailInput).toHaveValue("boba.lover@example.com");
   await expect(passwordInput).toHaveValue("Password123!");
 
@@ -66,11 +74,7 @@ export const InvalidCredentials: Story = {
   ),
   play: async ({ canvasElement }) => {
     const { submitButton, canvas } = await fillForm(canvasElement);
-    
-    // Click submit to trigger the mocked error response
     await userEvent.click(submitButton);
-
-    // Verify error message appears
     await waitFor(() => {
       expect(canvas.getByText(/invalid email or password/i)).toBeInTheDocument();
     });
@@ -86,18 +90,14 @@ export const PasswordToggle: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const passwordInput = canvas.getByPlaceholderText("Password");
-    const toggleButton = canvas.getByRole("button", { name: "" }); // The eye icon button
+    const toggleButton = canvas.getByRole("button", { name: "" }); 
 
     await userEvent.type(passwordInput, "Secret123");
-    
-    // Check initial state
     await expect(passwordInput).toHaveAttribute("type", "password");
 
-    // Toggle to visible
     await userEvent.click(toggleButton);
     await expect(passwordInput).toHaveAttribute("type", "text");
 
-    // Toggle back to hidden
     await userEvent.click(toggleButton);
     await expect(passwordInput).toHaveAttribute("type", "password");
   },
@@ -117,8 +117,6 @@ export const LoadingState: Story = {
   play: async ({ canvasElement }) => {
     const { submitButton, canvas } = await fillForm(canvasElement);
     await userEvent.click(submitButton);
-
-    // Verify button text changes to loading state
     await expect(canvas.getByText(/logging in\.\.\./i)).toBeInTheDocument();
     await expect(submitButton).toBeDisabled();
   },

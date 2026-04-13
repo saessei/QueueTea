@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import  supabase  from "../config/supabaseClient.ts";
 import { Session } from '@supabase/supabase-js';
@@ -44,7 +46,7 @@ export const AuthContextProvider = ({children}: AuthProviderProps) => {
 
         if (error) {
             console.error("There was a problem signing up:", error);
-            return { success: false, error };
+            return { success: false, error: error.message || "Signup failed" };
         }
         return { success: true, data };
     }

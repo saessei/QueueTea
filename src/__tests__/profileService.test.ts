@@ -12,10 +12,8 @@ vi.mock('../config/supabaseClient', () => ({
       select: vi.fn().mockReturnThis(),
       upsert: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      // maybeSingle is a terminal method, so it calls our mock
       maybeSingle: () => mockDbResponse(),
-      // upsert usually doesn't use maybeSingle, so we mock the 'thenable'
-      then: (onfulfilled: any) => onfulfilled(mockDbResponse()),
+      then: (onfulfilled: (value: unknown) => void) => onfulfilled(mockDbResponse()),
     })),
     auth: {
       updateUser: vi.fn(() => mockAuthResponse()),

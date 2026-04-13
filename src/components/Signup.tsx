@@ -31,9 +31,9 @@ export const Signup = () => {
       if (result.success) {
         navigate("/kiosk");
       } else {
-        setError(result.error || "An error occurred.");
+        setError(String(result.error || "An error occurred."));
       }
-    } catch (_error) {
+    } catch {
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);

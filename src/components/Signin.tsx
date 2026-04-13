@@ -39,7 +39,7 @@ export const Signin = () => {
           setError(result.error || "An error occurred.");
         }
       }
-    } catch (_error) {
+    } catch {
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);

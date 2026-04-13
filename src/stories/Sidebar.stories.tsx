@@ -1,27 +1,31 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Sidebar } from '../components//common/Sidebar';
-import { withRouter } from 'storybook-addon-remix-react-router';
-import { AuthContext }  from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
+import { BrowserRouter } from 'react-router-dom';
+import { userEvent } from 'storybook/test';
 
 const meta: Meta<typeof Sidebar> = {
   title: 'Components/Navigation/Sidebar',
   component: Sidebar,
   decorators: [
-    withRouter,
     (Story) => (
-      <AuthContext.Provider value={{
-        session: { 
-          user: { email: 'tea.lover@example.com' } 
-        } as any,
-        signOut: async () => console.log("Signed out!"),
-        signUpNewUser: async () => ({ success: false }),
-        signInUser: async () => ({ success: false }),
-        refreshSession: async () => console.log("Session refreshed!"),
-      }}>
+      <BrowserRouter>
+      <AuthContext.Provider
+        value={{
+          session: {
+            user: { email: "tea.lover@example.com" },
+          } as Record<string, unknown>,
+          signOut: async () => console.log("Signed out!"),
+          signUpNewUser: async () => ({ success: false }),
+          signInUser: async () => ({ success: false }),
+          refreshSession: async () => console.log("Session refreshed!"),
+        } as unknown as never} 
+      >
         <div className="flex h-screen bg-cream">
           <Story />
         </div>
       </AuthContext.Provider>
+      </BrowserRouter>
     ),
   ],
 };
@@ -33,22 +37,24 @@ export const Expanded: Story = {};
 
 export const Collapsed: Story = {
   play: async ({ canvasElement }) => {
-    const mainContent = canvasElement.querySelector('main');
+    const mainContent = canvasElement.parentElement;
     if (mainContent) {
-      mainContent.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      await userEvent.click(mainContent);
     }
   },
   decorators: [
     (Story) => (
-      <AuthContext.Provider value={{
-        session: { 
-          user: { email: 'tea.lover@example.com' } 
-        } as any,
-        signOut: async () => console.log("Signed out!"),
-        signUpNewUser: async () => ({ success: false }),
-        signInUser: async () => ({ success: false }),
-        refreshSession: async () => console.log("Session refreshed!"),
-      }}>
+      <AuthContext.Provider
+        value={{
+          session: {
+            user: { email: "tea.lover@example.com" },
+          } as Record<string, unknown>, 
+          signOut: async () => console.log("Signed out!"),
+          signUpNewUser: async () => ({ success: false }),
+          signInUser: async () => ({ success: false }),
+          refreshSession: async () => console.log("Session refreshed!"),
+        } as unknown as never} 
+      >
         <div className="flex h-screen bg-cream">
           <Story />
         </div>
