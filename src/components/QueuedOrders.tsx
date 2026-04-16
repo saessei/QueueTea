@@ -5,7 +5,6 @@ import { updateOrderStatus } from "../services/orders";
 import { OrderStatusButton } from "./common/OrderStatusButton";
 import { UserAuth } from "../context/AuthContext";
 
-
 export const QueuedOrders = () => {
   const { orders, fetchOrders } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");

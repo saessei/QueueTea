@@ -18,8 +18,6 @@ export const useOrders = () => {
   }, []); 
 
 useEffect(() => {
-    // Wrapping the initial fetch in an async function inside the effect
-    // often satisfies the linter's concern about synchronous state updates.
     const initializeOrders = async () => {
       await fetchOrders();
     };

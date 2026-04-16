@@ -7,7 +7,6 @@ import placeholderImg from "../assets/Placeholder.jpg";
 import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
 import { createOrder } from "../services/orders";
 
-// Strategy pattern
 interface CustomizationStrategy {
   name: string;
   options: string[];
@@ -50,7 +49,7 @@ export const Kiosk = () => {
   const [customerName, setCustomerName] = useState("");
 
   const products = useMemo(
-    () => ["BrownSugar", "Matcha", "Taro"].map((id) => DrinkFactory.createDrink(id as DrinkType)),
+    () => ["BrownSugar", "Matcha", "Taro", "Shrek"].map((id) => DrinkFactory.createDrink(id as DrinkType)),
     [],
   );
 

@@ -1,7 +1,7 @@
 // src/factories/DrinkFactory.ts
 import placeholderImg from "../assets/Placeholder.jpg";
 
-export type DrinkType = "BrownSugar" | "Matcha" | "Taro";
+export type DrinkType = "BrownSugar" | "Matcha" | "Taro" | "Shrek";
 
 export interface Drink {
   id: DrinkType;
@@ -42,6 +42,12 @@ export class DrinkFactory {
         image: placeholderImg,
         price: 110,
       },
+      Shrek: {
+        name: "Shrek Milk Tea",
+        description: "Matcha latte",
+        image: placeholderImg,
+        price: 100000,
+      }
     };
 
     const d = common[type];

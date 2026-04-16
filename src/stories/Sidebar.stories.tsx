@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { userEvent } from 'storybook/test';
 
 const meta: Meta<typeof Sidebar> = {
-  title: 'Components/Navigation/Sidebar',
+  title: 'Components/Sidebar',
   component: Sidebar,
   decorators: [
     (Story) => (
