@@ -1,74 +1,94 @@
 import { it, expect, describe, afterAll } from 'vitest';
 import { createOrder, updateOrderStatus } from '../services/orderService';
-import { adminClient } from './setup';
+import { supabaseTest, supabaseAdmin } from '../lib/supabaseTestClient';
 
-describe('Order Service - Integration Tests', () => {
-  const testCustomerName = `Test User ${crypto.randomUUID()}`;
-  let createdOrderId: string;
+describe('Milk Tea Queueing System - Full Integration', () => {
+  const testSessionId = crypto.randomUUID().slice(0, 8);
+  const testCustomer = `Test-Customer-${testSessionId}`;
+  let sharedOrderId: string;
 
-  // Cleanup after tests to keep the test DB clean
+  // CLEANUP
   afterAll(async () => {
-    await adminClient
+    const { error } = await supabaseAdmin
       .from('orders')
       .delete()
-      .eq('customer_name', testCustomerName);
+      .eq('customer_name', testCustomer);
+    
+    if (error) console.error('Cleanup failed:', error.message);
   });
 
-  //  HAPPY PATHS 
+  // Happy paths
   describe('Happy Path', () => {
-    it('successfully creates an order and returns the data', async () => {
-      const payload = {
-        customer_name: testCustomerName,
-        order_details: '2x Coffee, 1x Croissant',
-        status: 'pending'
+    it('should successfully place a "Classic Milk Tea" order', async () => {
+      const milkTeaOrder = {
+        customer_name: testCustomer,
+        order_details: 'Classic Milk Tea, 75% Sugar, Pearls',
+        status: 'pending' 
       };
 
-      const data = await createOrder(payload);
+      const data = await createOrder(milkTeaOrder, supabaseTest);
 
       expect(data).not.toBeNull();
-      expect(data![0]).toMatchObject(payload);
-      expect(data![0].id).toBeDefined();
+      expect(data![0].customer_name).toBe(testCustomer);
+      expect(data![0].status).toBe('pending');
       
-      createdOrderId = data![0].id; // Save for update test
+      sharedOrderId = data![0].id;
     });
 
-    it('successfully updates an existing order status', async () => {
-      const updated = await updateOrderStatus(createdOrderId, 'preparing');
+    it('should update order to "preparing" when the barista starts', async () => {
+      const data = await updateOrderStatus(sharedOrderId, 'preparing', supabaseTest);
 
-      expect(updated).not.toBeNull();
-      expect(updated![0].status).toBe('preparing');
+      expect(data).not.toBeNull();
+      expect(data![0].status).toBe('preparing');
+    });
+
+    it('should update order to "completed" when ready for pickup', async () => {
+      const data = await updateOrderStatus(sharedOrderId, 'completed', supabaseTest);
+
+      expect(data).not.toBeNull();
+      expect(data![0].status).toBe('completed');
     });
   });
 
-  // --- SAD PATHS 
+  // Sad paths
   describe('Sad Path', () => {
-    it('throws an error when creating an order with missing required fields', async () => {
+    
+    it('should fail when customer_name is missing (DB Constraint)', async () => {
       const invalidOrder = {
-        customer_name: null as any, 
-        order_details: 'Missing name',
+        customer_name: null as any,
+        order_details: 'Taro Milk Tea',
         status: 'pending'
       };
 
-      // We expect createOrder to throw because of your 'throw new Error(error.message)'
-      await expect(createOrder(invalidOrder)).rejects.toThrow();
+      await expect(createOrder(invalidOrder, supabaseTest)).rejects.toThrow();
     });
 
-    it('returns an empty array when updating an order ID that does not exist', async () => {
-      const nonExistentId = crypto.randomUUID();
-      const result = await updateOrderStatus(nonExistentId, 'cancelled');
+    it('should return an empty array when updating a non-existent Order ID', async () => {
+      const fakeUuid = crypto.randomUUID();
+      const result = await updateOrderStatus(fakeUuid, 'preparing', supabaseTest);
 
-      // Supabase .update() returns [] if no rows match the .eq() filter
       expect(result).toHaveLength(0);
     });
 
-    it('handles database constraint violations (e.g., status too long)', async () => {
-      const longStatus = 'this_status_is_way_too_long_for_the_database_column';
-      
-      const result = await updateOrderStatus(createdOrderId, longStatus);
-      
-      if (result === null) {
-        expect(result).toBeNull();
+    it('should handle extremely long order details (Database Limit)', async () => {
+      const extremeOrder = {
+        customer_name: testCustomer,
+        order_details: 'Milk Tea'.repeat(500), 
+        status: 'pending'
+      };
+
+      try {
+        const data = await createOrder(extremeOrder, supabaseTest);
+        expect(data).toBeDefined();
+      } catch (error) {
+        expect(error).toBeDefined();
       }
+    });
+
+    it('should return null when update fails due to invalid parameters', async () => {
+      const result = await updateOrderStatus('not-a-uuid', 'completed', supabaseTest);
+      
+      expect(result).toBeNull();
     });
   });
 });

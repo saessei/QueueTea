@@ -5,6 +5,10 @@ import path from "path";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
+  process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
+  process.env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY;
+  process.env.SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+  
   return {
     test: {
       exclude: [
@@ -16,7 +20,12 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       globals: true,
       setupFiles: [path.resolve(__dirname, "./src/tests/setup.ts")],
-      env: env,
+      env: {
+        ...env,
+        VITE_SUPABASE_URL: env.VITE_SUPABASE_URL,
+        VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY,
+      },
     },
   };
 });

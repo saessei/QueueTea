@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
-import  supabase  from "../config/supabaseClient.ts";
+import  supabase  from "../lib/supabaseClient.ts";
 import { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
