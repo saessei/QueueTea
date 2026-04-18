@@ -17,7 +17,7 @@ const Categories: readonly DrinkCategory[] = [
   {
     id: "specials",
     label: "Specials",
-    drinkIds: ["Matcha", "Shrek"],
+    drinkIds: ["Matcha"],
   },
   {
     id: "fruit tea",
