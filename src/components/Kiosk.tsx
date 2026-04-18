@@ -39,7 +39,7 @@ export const Kiosk = () => {
   const navigate = useNavigate();
   const { session } = UserAuth();
 
-  const baristaUserId = session?.user?.id; // used as owner key for Option C cart
+  const baristaUserId = session?.user?.id;
   const {
     cart,
     upsertItem,
@@ -237,6 +237,15 @@ export const Kiosk = () => {
       </aside>
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto p-4 lg:p-6 pt-28 lg:pt-6">
+        <div className="mb-6">
+          <h1 className="text-5xl font-black font-fredoka">Kiosk</h1>
+          <p className="text-lg text-gray-500">Get ready to take orders!</p>
+        </div>
+
+        <div className="mb-6 flex items-center gap-3">
+          <button type="button" className="rounded-full px-5 py-2 bg-dark-brown text-white cursor-pointer">Milktea</button>
+        </div>
+
         <section className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
           {products.map((drink) => (
             <article
