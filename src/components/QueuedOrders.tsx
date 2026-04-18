@@ -19,17 +19,28 @@ export const QueuedOrders = () => {
   
   const incomingOrders = orders.filter((order) => order.status === "pending");
   const preparingOrders = orders.filter((order) => order.status === "preparing");
-  const completedOrders = orders.filter((order) => order.status === "completed");
+  const completedOrders = orders
+  .filter((order) => order.status === "completed")
+  .sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 
-  const queueOrders = viewMode === "active"
-    ? orders.filter((order) => order.status !== "completed")
+  const queueOrders =
+  viewMode === "active"
+    ? orders.filter((order) => order.status !== "completed" && order.status !== "cancelled")
     : completedOrders;
 
   const handleStatusChange = async (order: { id: string; status: string }) => {
-    const nextStatus = order.status === "pending" ? "preparing" : "completed";
-    await updateOrderStatus(order.id, nextStatus);
-    fetchOrders();
-  };
+  const nextStatus =
+    order.status === "pending"
+      ? "preparing"
+      : order.status === "preparing"
+        ? "completed"
+        : "cancelled"; // archive completed orders
+
+  await updateOrderStatus(order.id, nextStatus);
+  fetchOrders();
+};
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
