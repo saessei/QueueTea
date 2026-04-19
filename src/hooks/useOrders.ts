@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import defaultSupabase from "../lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-interface Order {
+export interface Order {
   id: string;
   customer_name: string;
   order_details: string;
@@ -19,19 +19,27 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
   }, [supabase]);
 
   useEffect(() => {
-    fetchOrders();
+    let cancelled = false;
+
+    const run = async () => {
+      const { data } = await supabase.from("orders").select("*").order("created_at");
+      if (!cancelled && data) setOrders(data);
+    };
+
+    void run();
 
     const channel = supabase
       .channel("queue-tea-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
-        fetchOrders();
+        void run();
       })
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [fetchOrders, supabase]);
+  }, [supabase]);
 
   return { orders, fetchOrders };
 };

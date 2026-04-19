@@ -54,7 +54,7 @@ describe('Milk Tea Queueing System - Full Integration', () => {
     
     it('should fail when customer_name is missing (DB Constraint)', async () => {
       const invalidOrder = {
-        customer_name: null as any,
+        customer_name: null as unknown as string,
         order_details: 'Taro Milk Tea',
         status: 'pending'
       };

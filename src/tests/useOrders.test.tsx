@@ -16,23 +16,42 @@ describe("useOrders (integration, test DB)", () => {
     if (createdOrderIds.length) {
       await supabaseAdmin.from("orders").delete().in("id", createdOrderIds);
     } else {
-      await supabaseAdmin.from("orders").delete().like("order_details", `%${testRunId}%`);
+      await supabaseAdmin
+        .from("orders")
+        .delete()
+        .like("order_details", `%${testRunId}%`);
     }
   });
 
   it("fetchOrders loads orders from test DB and updates state", async () => {
     const a = await createOrder(
-      { customer_name: testCustomer, order_details: `A (${testRunId})`, status: "pending" },
+      {
+        customer_name: testCustomer,
+        order_details: `A (${testRunId})`,
+        status: "pending",
+      },
       supabaseTest,
     );
     const b = await createOrder(
-      { customer_name: testCustomer, order_details: `B (${testRunId})`, status: "pending" },
+      {
+        customer_name: testCustomer,
+        order_details: `B (${testRunId})`,
+        status: "pending",
+      },
       supabaseTest,
     );
 
     createdOrderIds.push(a![0].id, b![0].id);
 
-    let latestOrders: any[] = [];
+    type OrderRow = {
+      id: string;
+      customer_name: string;
+      order_details: string;
+      status: "pending" | "preparing" | "completed" | "cancelled";
+      created_at: string;
+    };
+
+    let latestOrders: OrderRow[] = [];
     let latestFetch: (() => Promise<void>) | null = null;
 
     function Harness() {
