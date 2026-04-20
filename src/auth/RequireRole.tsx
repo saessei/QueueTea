@@ -11,20 +11,25 @@ export function RequireRole({
   allow: Role[];
   children: ReactNode;
 }) {
-  const { session } = UserAuth();
+  const { session, loading } = UserAuth();
   const location = useLocation();
 
-  // Not logged in -> go sign in
+  if (loading) return null; 
+
   if (!session) {
-    return <Navigate to="/signin" replace state={{ from: location }} />;
+    return (
+      <Navigate
+        to="/signin"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
   }
 
   const role = session.user.user_metadata?.role as Role | undefined;
 
-  // Logged in but no role or wrong role -> send them to their default page
   if (!role || !allow.includes(role)) {
-    const fallback = role === "barista" ? "/queued-orders" : "/kiosk";
-    return <Navigate to={fallback} replace />;
+    return <Navigate to="/settings" replace />;
   }
 
   return <>{children}</>;

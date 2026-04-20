@@ -5,25 +5,31 @@ import {
   useState,
   useEffect,
   useContext,
-  ReactNode,
+  type ReactNode,
 } from "react";
+import type { Session } from "@supabase/supabase-js";
 import supabase from "../lib/supabaseClient.ts";
-import { Session } from "@supabase/supabase-js";
 
 type Role = "cashier" | "barista";
+
 interface AuthContextType {
   session: Session | null;
+  loading: boolean;
+
   signUpNewUser: (
     email: string,
     password: string,
     displayName?: string,
     role?: Role,
   ) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
+
   signOut: () => Promise<void>;
+
   signInUser: (
     email: string,
     password: string,
   ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
+
   refreshSession: () => Promise<void>;
 }
 
@@ -37,20 +43,21 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const refreshSession = async () => {
-  const {
-    data: { session: updatedSession },
-    error,
-  } = await supabase.auth.getSession();
+    const {
+      data: { session: updatedSession },
+      error,
+    } = await supabase.auth.getSession();
 
-  if (error) {
-    console.error("refreshSession error:", error);
-    return;
-  }
+    if (error) {
+      console.error("refreshSession error:", error);
+      return;
+    }
 
-  setSession(updatedSession); 
-};
+    setSession(updatedSession ?? null);
+  };
 
   // Sign up
   const signUpNewUser = async (
@@ -60,8 +67,8 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     role: Role = "cashier",
   ) => {
     const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
+      email,
+      password,
       options: {
         data: {
           display_name: displayName || "",
@@ -78,18 +85,18 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   };
 
   // Sign in
-
   const signInUser = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
+        email,
+        password,
       });
+
       if (error) {
         console.error("Sign in error occured: ", error);
         return { success: false, error: error.message };
       }
-      console.log("Sign in success: ", data);
+
       return { success: true, data };
     } catch (error) {
       console.error("An error occured: ", error);
@@ -98,16 +105,26 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      if (!mounted) return;
+      setSession(session ?? null);
+      setLoading(false);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session ?? null);
+      setLoading(false);
     });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
-  // Signout
+  // Sign out
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -117,7 +134,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ session, signUpNewUser, signInUser, signOut, refreshSession }}
+      value={{
+        session,
+        loading,
+        signUpNewUser,
+        signInUser,
+        signOut,
+        refreshSession,
+      }}
     >
       {children}
     </AuthContext.Provider>
