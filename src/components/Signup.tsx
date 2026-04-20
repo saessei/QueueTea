@@ -7,8 +7,11 @@ import * as React from "react";
 import "../index.css";
 import { Eye, EyeOff } from "lucide-react";
 
+type Role = "cashier" | "barista";
+
 export const Signup = () => {
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<Role>("cashier");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,10 +29,10 @@ export const Signup = () => {
     setLoading(true);
     setError("");
     try {
-      const result = await signUpNewUser(email, password, name);
+      const result = await signUpNewUser(email, password, name, role);
 
       if (result.success) {
-        navigate("/kiosk");
+        navigate(role === "barista" ? "/queued-orders" : "/kiosk");
       } else {
         setError(String(result.error || "An error occurred."));
       }
@@ -39,6 +42,8 @@ export const Signup = () => {
       setLoading(false);
     }
   };
+
+  const isBarista = role === "barista";
 
   return (
     <div className="bg-cream h-screen w-full overflow-hidden flex flex-col relative">
@@ -83,6 +88,42 @@ export const Signup = () => {
               className="p-3 mt-1 mb-4 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
               type="email"
             />
+            <label className="text-xs ml-2 uppercase font-semibold">Role</label>
+
+            <button
+              type="button"
+              onClick={() => setRole(isBarista ? "cashier" : "barista")}
+              className="mt-1 mb-4 w-full rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all px-4 py-3"
+              aria-label="Toggle role"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  {isBarista
+                    ? "I want to be a barista"
+                    : "I want to be a cashier"}
+                </span>
+
+                {/* switch track */}
+                <div
+                  className={`relative h-6 w-12 rounded-full transition-colors ${
+                    isBarista ? "bg-brown" : "bg-slate-300"
+                  }`}
+                >
+                  {/* switch thumb */}
+                  <div
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                      isBarista ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <p className="mt-2 text-left text-xs text-gray-500">
+                {isBarista
+                  ? "Barista sees the queued orders station."
+                  : "Cashier sees the kiosk ordering screen."}
+              </p>
+            </button>
             <label className="text-xs ml-2 uppercase font-semibold">
               Password
             </label>
