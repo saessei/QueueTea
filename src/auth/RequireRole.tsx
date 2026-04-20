@@ -29,7 +29,7 @@ export function RequireRole({
   const role = session.user.user_metadata?.role as Role | undefined;
 
   if (!role || !allow.includes(role)) {
-    return <Navigate to="/settings" replace />;
+    return <Navigate to="/queued-orders" replace />;
   }
 
   return <>{children}</>;
