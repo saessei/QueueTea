@@ -39,14 +39,18 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
 
   const refreshSession = async () => {
-    const {
-      data: { session: updatedSession },
-      error,
-    } = await supabase.auth.getSession();
-    if (!error && updatedSession) {
-      setSession(updatedSession);
-    }
-  };
+  const {
+    data: { session: updatedSession },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("refreshSession error:", error);
+    return;
+  }
+
+  setSession(updatedSession); 
+};
 
   // Sign up
   const signUpNewUser = async (

@@ -53,7 +53,6 @@ export const Kiosk = () => {
     session?.user?.email?.split("@")[0] ||
     "Guest";
 
-  const baristaName = userName;
   const [customerName, setCustomerName] = useState("");
 
   const categories = useMemo(() => getCategoryFactories(), []);
