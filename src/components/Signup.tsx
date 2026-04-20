@@ -76,7 +76,7 @@ export const Signup = () => {
               <button
                 type="button"
                 onClick={() => setRole("cashier")}
-                className={`rounded-full px-4 py-2 font-fredoka text-lg transition-colors flex items-center justify-center gap-2
+                className={`rounded-full px-4 py-2 font-fredoka text-md uppercase transition-colors flex items-center justify-center gap-2
         ${role === "cashier" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
       `}
                 aria-pressed={role === "cashier"}
@@ -89,7 +89,7 @@ export const Signup = () => {
               <button
                 type="button"
                 onClick={() => setRole("barista")}
-                className={`rounded-full px-4 py-2 font-fredoka text-lg transition-colors flex items-center justify-center gap-2
+                className={`rounded-full px-4 py-2 font-fredoka text-md uppercase transition-colors flex items-center justify-center gap-2
         ${role === "barista" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
       `}
                 aria-pressed={role === "barista"}
