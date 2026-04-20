@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import * as React from "react";
 import "../index.css";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Store, Coffee } from "lucide-react";
 
 type Role = "cashier" | "barista";
 
@@ -68,6 +68,37 @@ export const Signup = () => {
               </Link>
             </p>
           </div>
+          <label className="text-xs uppercase ml-2 font-semibold font-quicksand text-brown-two">I want to sign up as...</label>
+
+          <div className="mt-2 mb-4 rounded-full border border-slate-300 bg-[#f3efe8] p-1">
+            <div className="grid grid-cols-2 gap-1">
+              {/* Cashier */}
+              <button
+                type="button"
+                onClick={() => setRole("cashier")}
+                className={`rounded-full px-4 py-2 font-fredoka text-lg transition-colors flex items-center justify-center gap-2
+        ${role === "cashier" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
+      `}
+                aria-pressed={role === "cashier"}
+              >
+                <Store size={20} />
+                Cashier
+              </button>
+
+              {/* Barista */}
+              <button
+                type="button"
+                onClick={() => setRole("barista")}
+                className={`rounded-full px-4 py-2 font-fredoka text-lg transition-colors flex items-center justify-center gap-2
+        ${role === "barista" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
+      `}
+                aria-pressed={role === "barista"}
+              >
+                <Coffee size={20} />
+                Barista
+              </button>
+            </div>
+          </div>
 
           <div className="flex flex-col font-quicksand text-brown-two ">
             <label className="text-xs uppercase ml-2 font-semibold">
@@ -88,42 +119,7 @@ export const Signup = () => {
               className="p-3 mt-1 mb-4 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
               type="email"
             />
-            <label className="text-xs ml-2 uppercase font-semibold">Role</label>
 
-            <button
-              type="button"
-              onClick={() => setRole(isBarista ? "cashier" : "barista")}
-              className="mt-1 mb-4 w-full rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all px-4 py-3"
-              aria-label="Toggle role"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {isBarista
-                    ? "I want to be a barista"
-                    : "I want to be a cashier"}
-                </span>
-
-                {/* switch track */}
-                <div
-                  className={`relative h-6 w-12 rounded-full transition-colors ${
-                    isBarista ? "bg-brown" : "bg-slate-300"
-                  }`}
-                >
-                  {/* switch thumb */}
-                  <div
-                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                      isBarista ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <p className="mt-2 text-left text-xs text-gray-500">
-                {isBarista
-                  ? "Barista sees the queued orders station."
-                  : "Cashier sees the kiosk ordering screen."}
-              </p>
-            </button>
             <label className="text-xs ml-2 uppercase font-semibold">
               Password
             </label>
