@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { act } from "react-dom/test-utils";
 import { createRoot } from "react-dom/client";
+import { useEffect } from "react";
 import { useCart, type CartItem } from "../hooks/useCart";
 import { supabaseAdmin, supabaseTest } from "../lib/supabaseTestClient";
 
@@ -48,7 +49,12 @@ describe("useCart (integration, real Supabase DB)", () => {
     let latest: ReturnType<typeof useCart> | null = null;
 
     function Harness() {
-      latest = useCart(baristaUserId);
+      const cart = useCart(baristaUserId);
+
+      useEffect(() => {
+        latest = cart;
+      }, [cart]);
+
       return null;
     }
 
@@ -123,7 +129,7 @@ describe("useCart (integration, real Supabase DB)", () => {
           harness.getLatest().cart[0]?.quantity === 1,
       );
 
-      let { data: items, error: itemsErr } = await supabaseTest
+      const { data: items, error: itemsErr } = await supabaseTest
         .from("cart_items")
         .select(
           "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity",
