@@ -43,7 +43,7 @@ export const Signup = () => {
     }
   };
 
-  const isBarista = role === "barista";
+  // const isBarista = role === "barista";
 
   return (
     <div className="bg-cream h-screen w-full overflow-hidden flex flex-col relative">

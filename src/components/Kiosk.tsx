@@ -48,10 +48,10 @@ export const Kiosk = () => {
     clearCart,
   } = useCart(baristaUserId);
 
-  const userName =
-    session?.user?.user_metadata?.display_name ||
-    session?.user?.email?.split("@")[0] ||
-    "Guest";
+  // const userName =
+  //   session?.user?.user_metadata?.display_name ||
+  //   session?.user?.email?.split("@")[0] ||
+  //   "Guest";
 
   const [customerName, setCustomerName] = useState("");
 
