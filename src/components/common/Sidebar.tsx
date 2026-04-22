@@ -1,10 +1,8 @@
 import { useRef, useState } from "react";
-import { Store, List, BarChart2, Settings, LogOut, Menu, X } from "lucide-react";
+import { Store, List, Settings, LogOut, Menu, X, BarChart2 } from "lucide-react";
 import { UserAuth } from "../../auth/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
-
-type Role = "cashier" | "barista";
 
 export const Sidebar = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -14,23 +12,10 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const role = session?.user?.user_metadata?.role as Role | undefined;
-
   const sidebarItems = [
-    ...(role === "cashier"
-      ? [{ name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" }]
-      : []),
-
-    ...(role === "barista"
-      ? [
-          {
-            name: "Queued Orders",
-            icon: <List size={20} />,
-            path: "/queued-orders",
-          },
-        ]
-      : []),
-    { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
+    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
+    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
+    { name: "Reports", icon: <BarChart2 size={20} />, path: "/reports" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 

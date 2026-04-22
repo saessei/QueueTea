@@ -10,8 +10,6 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import supabase from "../lib/supabaseClient.ts";
 
-type Role = "cashier" | "barista";
-
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
@@ -20,7 +18,6 @@ interface AuthContextType {
     email: string,
     password: string,
     displayName?: string,
-    role?: Role,
   ) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
 
   signOut: () => Promise<void>;
@@ -64,7 +61,6 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     email: string,
     password: string,
     displayName?: string,
-    role: Role = "cashier",
   ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -72,7 +68,6 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       options: {
         data: {
           display_name: displayName || "",
-          role,
         },
       },
     });

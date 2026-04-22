@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
   {
     path: "/kiosk",
     element: (
-      <RequireRole allow={["cashier"]}>
+      <RequireRole>
         <Kiosk />
       </RequireRole>
     ),
@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
   {
     path: "/queued-orders",
     element: (
-      <RequireRole allow={["barista"]}>
+      <RequireRole>
         <QueuedOrders />
       </RequireRole>
     ),
@@ -33,7 +33,7 @@ export const router = createBrowserRouter([
   {
     path: "/settings",
     element: (
-      <RequireRole allow={["cashier", "barista"]}>
+      <RequireRole>
         <Settings />
       </RequireRole>
     ),

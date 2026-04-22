@@ -5,13 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../auth/AuthContext";
 import * as React from "react";
 import "../index.css";
-import { Eye, EyeOff, Store, Coffee } from "lucide-react";
-
-type Role = "cashier" | "barista";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Signup = () => {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Role>("cashier");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,10 +26,10 @@ export const Signup = () => {
     setLoading(true);
     setError("");
     try {
-      const result = await signUpNewUser(email, password, name, role);
+      const result = await signUpNewUser(email, password, name);
 
       if (result.success) {
-        navigate(role === "barista" ? "/queued-orders" : "/kiosk");
+        navigate("/kiosk");
       } else {
         setError(String(result.error || "An error occurred."));
       }
@@ -42,8 +39,6 @@ export const Signup = () => {
       setLoading(false);
     }
   };
-
-  // const isBarista = role === "barista";
 
   return (
     <div className="bg-cream h-screen w-full overflow-hidden flex flex-col relative">
@@ -68,38 +63,6 @@ export const Signup = () => {
               </Link>
             </p>
           </div>
-          <label className="text-xs uppercase ml-2 font-semibold font-quicksand text-brown-two">I want to sign up as...</label>
-
-          <div className="mt-2 mb-4 rounded-full border border-slate-300 bg-[#f3efe8] p-1">
-            <div className="grid grid-cols-2 gap-1">
-              {/* Cashier */}
-              <button
-                type="button"
-                onClick={() => setRole("cashier")}
-                className={`rounded-full px-4 py-2 font-fredoka text-md uppercase transition-colors flex items-center justify-center gap-2
-        ${role === "cashier" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
-      `}
-                aria-pressed={role === "cashier"}
-              >
-                <Store size={20} />
-                Cashier
-              </button>
-
-              {/* Barista */}
-              <button
-                type="button"
-                onClick={() => setRole("barista")}
-                className={`rounded-full px-4 py-2 font-fredoka text-md uppercase transition-colors flex items-center justify-center gap-2
-        ${role === "barista" ? "bg-brown-two text-white shadow-sm" : "bg-transparent text-brown-two"}
-      `}
-                aria-pressed={role === "barista"}
-              >
-                <Coffee size={20} />
-                Barista
-              </button>
-            </div>
-          </div>
-
           <div className="flex flex-col font-quicksand text-brown-two ">
             <label className="text-xs uppercase ml-2 font-semibold">
               Full Name
