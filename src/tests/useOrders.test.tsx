@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import { describe, it, expect, afterAll } from "vitest";
-import { act } from "react-dom/test-utils";
-import { createRoot } from "react-dom/client";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useOrders } from "../hooks/useOrders";
 import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
 import { createOrder } from "../services/orderService";
@@ -11,6 +9,7 @@ describe("useOrders (integration, test DB)", () => {
   const testCustomer = `HookUser-${testRunId}`;
   const createdOrderIds: string[] = [];
 
+  // CLEANUP: Always use admin client to wipe data after tests
   afterAll(async () => {
     if (createdOrderIds.length) {
       await supabaseAdmin.from("orders").delete().in("id", createdOrderIds);
@@ -23,6 +22,7 @@ describe("useOrders (integration, test DB)", () => {
   });
 
   it("fetchOrders loads orders from test DB and updates state", async () => {
+    // 1. Seed data into the real DB
     const a = await createOrder(
       {
         customer_name: testCustomer,
@@ -40,49 +40,32 @@ describe("useOrders (integration, test DB)", () => {
       supabaseTest,
     );
 
-    createdOrderIds.push(a![0].id, b![0].id);
-
-    type OrderRow = {
-      id: string;
-      customer_name: string;
-      order_details: string;
-      status: "pending" | "preparing" | "completed" | "cancelled";
-      created_at: string;
-    };
-
-    let latestOrders: OrderRow[] = [];
-    let latestFetch: (() => Promise<void>) | null = null;
-
-    function Harness() {
-      const { orders, fetchOrders } = useOrders(supabaseTest);
-
-      useEffect(() => {
-        latestOrders = orders;
-        latestFetch = fetchOrders;
-      }, [orders, fetchOrders]);
-
-      return null;
+    if (a?.[0]?.id && b?.[0]?.id) {
+      createdOrderIds.push(a[0].id, b[0].id);
     }
 
-    const el = document.createElement("div");
-    document.body.appendChild(el);
-    const root = createRoot(el);
+    // 2. Render the hook using Testing Library
+    const { result } = renderHook(() => useOrders(supabaseTest));
 
-    await act(async () => {
-      root.render(<Harness />);
-    });
+    // 3. Trigger the fetch logic inside the hook
+    // No manual act() needed—waitFor or the trigger itself handles it
+    await result.current.fetchOrders();
 
-    await act(async () => {
-      await latestFetch?.();
-    });
+    // 4. Use waitFor to observe the state change
+    await waitFor(() => {
+      const mine = result.current.orders.filter(
+        (o) => o.customer_name === testCustomer
+      );
+      expect(mine.length).toBeGreaterThanOrEqual(2);
+    }, { timeout: 10000 });
 
-    const mine = latestOrders.filter((o) => o.customer_name === testCustomer);
-    expect(mine.length).toBeGreaterThanOrEqual(2);
-
+    // 5. Final assertions on the state
+    const mine = result.current.orders.filter(
+      (o) => o.customer_name === testCustomer
+    );
+    
     const times = mine.map((o) => new Date(o.created_at).getTime());
+    // Ensure orders are sorted by time (ascending)
     expect(times).toEqual([...times].sort((x, y) => x - y));
-
-    await act(async () => root.unmount());
-    el.remove();
   });
 });
