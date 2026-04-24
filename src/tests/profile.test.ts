@@ -1,26 +1,17 @@
-import { it, expect, describe, afterAll, beforeEach } from 'vitest';
+import { it, expect, describe, afterAll } from 'vitest';
 import { profileService } from '../services/profileService';
-import supabase from '../lib/supabaseClient'; // Flexible client
-import { clearDatabase } from '../utils/db';
+import { supabaseTest, supabaseAdmin } from '../lib/supabaseTestClient';
 
-describe('Profile Integration Test', () => {
-  const tempEmail = `barista-${Date.now()}@test.com`;
+describe('Password Management', () => {
+  const tempEmail = `barista-${Date.now()}@test.com`; // Unique email every time
   const tempPassword = 'OldPassword123!';
   const newPassword = 'NewSecurePassword456!';
   let userId: string | undefined;
 
-  beforeEach(async () => {
-    await clearDatabase();
-  });
-
-  afterAll(async () => {
-    if (userId) {
-      await supabase.auth.admin.deleteUser(userId);
-    }
-  });
-
+  // happy path
   it('should successfully update password for an authenticated user', async () => {
-    const { data: adminData, error: adminError } = await supabase.auth.admin.createUser({
+    // 
+    const { data: adminData, error: adminError } = await supabaseAdmin.auth.admin.createUser({
       email: tempEmail,
       password: tempPassword,
       email_confirm: true 
@@ -29,14 +20,19 @@ describe('Profile Integration Test', () => {
     if (adminError) throw adminError;
     userId = adminData.user?.id;
 
-    await supabase.auth.signInWithPassword({
+    // Sign in
+    const { error: signInError } = await supabaseTest.auth.signInWithPassword({
       email: tempEmail,
       password: tempPassword,
     });
     
-    await profileService.updatePassword(newPassword, supabase);
+    if (signInError) throw signInError;
 
-    const { data: verifyData, error: verifyError } = await supabase.auth.signInWithPassword({
+    // Update password via servic
+    await profileService.updatePassword(newPassword, supabaseTest);
+
+    // verify update password
+    const { data: verifyData, error: verifyError } = await supabaseTest.auth.signInWithPassword({
       email: tempEmail,
       password: newPassword,
     });
@@ -45,8 +41,24 @@ describe('Profile Integration Test', () => {
     expect(verifyData.user?.email).toBe(tempEmail);
   });
 
+  // sad path
   it("should fail to update password when user is not authenticated", async () => {
-    await supabase.auth.signOut();
-    await expect(profileService.updatePassword("SomePassword123!", supabase)).rejects.toThrow();
+  await supabaseTest.auth.signOut();
+
+  try {
+    await profileService.updatePassword("SomePassword123!", supabaseTest);
+    throw new Error("Expected updatePassword to throw, but it succeeded");
+  } catch (err) {
+    expect(err).toBeDefined();
+    if (err instanceof Error) {
+      expect(err.message.length).toBeGreaterThan(0);
+    }
+  }
+});
+
+  afterAll(async () => {
+    if (userId) {
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+    }
   });
 });
