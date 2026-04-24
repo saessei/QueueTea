@@ -35,6 +35,9 @@ class ToppingStrategy implements CustomizationStrategy {
   }
 }
 
+const sugarStrategy = new SugarStrategy();
+const toppingStrategy = new ToppingStrategy();
+
 export const Kiosk = () => {
   const { session } = UserAuth();
 
@@ -67,9 +70,7 @@ export const Kiosk = () => {
 
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const [showModal, setShowModal] = useState(false);
-
-  const sugarStrategy = new SugarStrategy();
-  const toppingStrategy = new ToppingStrategy();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [sugarLevel, setSugarLevel] = useState(sugarStrategy.options[2]);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
@@ -82,6 +83,18 @@ export const Kiosk = () => {
     setSugarLevel(sugarStrategy.options[2]);
     setSelectedToppings([]);
     setShowModal(true);
+  };
+
+  //prevent double clicks
+  const handleAddToOrder = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await addToCart();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addToCart = async () => {
@@ -118,7 +131,7 @@ export const Kiosk = () => {
   };
 
   const handleCheckout = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || isSubmitting) return;
 
     const orderDetails = cart
       .map((item) => {
@@ -317,8 +330,14 @@ export const Kiosk = () => {
 
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => openCustomization(drink)}
-                    className="mt-4 w-full rounded-xl bg-brown text-white py-3 font-semibold hover:bg-brown-dark transition-colors cursor-pointer"
+                    className={`mt-4 w-full rounded-xl py-3 font-semibold transition-colors 
+    ${
+      isSubmitting
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-brown text-white hover:bg-brown-dark cursor-pointer"
+    }`}
                   >
                     + Add to Order
                   </button>
@@ -410,16 +429,11 @@ export const Kiosk = () => {
               </div>
 
               <div className="flex justify-end gap-3">
+          
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-5 py-2 rounded-xl border border-slate-300 text-sm font-semibold hover:bg-slate-100 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={addToCart}
+                  disabled={isSubmitting}
+                  onClick={handleAddToOrder}
                   className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark cursor-pointer"
                 >
                   Add to Cart
