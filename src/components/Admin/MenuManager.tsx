@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
+ 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, Edit, Trash2, X } from "lucide-react";
 import { dynamicMenu, DynamicCategory, DynamicDrink, Topping, SugarLevel } from "../../services/DynamicMenuService";
