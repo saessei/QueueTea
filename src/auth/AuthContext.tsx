@@ -75,6 +75,7 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     adminPin?: string,
   ) => {
     try {
+      // First, create the auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -87,32 +88,55 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
-        console.error("There was a problem signing up:", error);
+        console.error("Signup error:", error);
         return { success: false, error: error.message || "Signup failed" };
       }
 
-      if (data.user && adminPin && adminPin.length >= 4) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const { error: profileError } = await supabase
+      if (!data.user) {
+        return { success: false, error: "Failed to create user" };
+      }
+
+      console.log("User created:", data.user.id);
+
+      // Wait a bit for the user to be fully registered
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Create the profile manually
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          email: email,
+          full_name: displayName || "",
+          display_name: displayName || "",
+          admin_pin: adminPin && adminPin.length >= 4 ? adminPin : null,
+        });
+
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        // Try to update instead if insert fails
+        const { error: updateError } = await supabase
           .from("profiles")
-          .upsert({
-            id: data.user.id,
+          .update({
             email: email,
             full_name: displayName || "",
             display_name: displayName || "",
-            admin_pin: adminPin,
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileError) {
-          console.error("Profile update error:", profileError);
+            admin_pin: adminPin && adminPin.length >= 4 ? adminPin : null,
+          })
+          .eq("id", data.user.id);
+        
+        if (updateError) {
+          console.error("Profile update also failed:", updateError);
+        } else {
+          console.log("Profile updated successfully with admin PIN");
         }
+      } else {
+        console.log("Profile created successfully with admin PIN:", adminPin ? "Yes" : "No");
       }
 
       return { success: true, data };
     } catch (err) {
-      console.error("Unexpected error:", err);
+      console.error("Unexpected error during signup:", err);
       return { success: false, error: "An unexpected error occurred" };
     }
   };
@@ -125,7 +149,7 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
-        console.error("Sign in error occured: ", error);
+        console.error("Sign in error: ", error);
         return { success: false, error: error.message };
       }
 

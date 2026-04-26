@@ -63,12 +63,21 @@ export const MenuManager = () => {
     
     modalShownRef.current = true;
 
-    await supabase
+    // Check if user has a PIN in the database
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("admin_pin")
       .eq("id", session.user.id)
       .single();
 
+    if (error) {
+      console.error("Error checking profile:", error);
+    }
+
+    // Log whether user has a PIN
+    console.log("User has admin_pin:", !!profile?.admin_pin);
+    
+    // Always show the modal - the modal itself will determine if it's setup or verify mode
     setShowPinModal(true);
   }, [authLoading, session, navigate, loadData]);
 
@@ -193,7 +202,6 @@ export const MenuManager = () => {
             ))}
           </div>
           
-          {/* Rest of your JSX remains the same */}
           {/* Categories Tab */}
           {activeTab === 'categories' && (
             <div>
@@ -385,7 +393,7 @@ export const MenuManager = () => {
   );
 };
 
-// Edit Modal Component (keep your existing EditModal code)
+// Edit Modal Component
 const EditModal = ({ item, type, onSave, onClose, categories, toppings, sugarLevels }: any) => {
   const [formData, setFormData] = useState(item || {});
   

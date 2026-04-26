@@ -1,5 +1,4 @@
- 
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef } from "react";
 import { Key, Lock, X } from "lucide-react";
 import supabase from "../lib/supabaseClient";
@@ -21,7 +20,24 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
   const hasVerifiedRef = useRef(false);
   const isVerifyingRef = useRef(false);
 
-  // ALL HOOKS MUST BE BEFORE CONDITIONAL RETURNS
+  // Simplified profile check
+  const ensureProfileExists = async () => {
+    if (!session?.user?.id) return false;
+    
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ 
+        id: session.user.id, 
+        email: session.user.email,
+      }, { onConflict: 'id' });
+    
+    if (error) {
+      console.error("Error ensuring profile:", error);
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     checkUserPinStatus();
   }, [session]);
@@ -38,14 +54,21 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
 
   const checkUserPinStatus = async () => {
     try {
-      const { data: profile } = await supabase
+      await ensureProfileExists();
+
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("admin_pin")
         .eq("id", session?.user?.id)
         .single();
 
-      console.log("Has existing PIN:", !!profile?.admin_pin);
-      setHasExistingPin(!!profile?.admin_pin);
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setHasExistingPin(false);
+      } else {
+        console.log("Has existing PIN:", !!profile?.admin_pin);
+        setHasExistingPin(!!profile?.admin_pin);
+      }
     } catch (err) {
       console.error("Error checking PIN status:", err);
       setHasExistingPin(false);
@@ -70,6 +93,8 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       return;
     }
 
+    await ensureProfileExists();
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ admin_pin: pin })
@@ -80,7 +105,7 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       setError("Failed to set admin PIN");
       setLoading(false);
     } else {
-      console.log("PIN created successfully");
+      console.log("PIN created and saved successfully!");
       await refreshSession();
       setHasExistingPin(true);
       setPin("");
@@ -141,7 +166,6 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
     }
   };
 
-  // NOW conditional returns after all hooks
   if (!session?.user?.id) {
     return null;
   }
@@ -260,7 +284,7 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
           disabled={loading}
           className="w-full py-3 bg-dark-brown text-white rounded-xl font-semibold hover:bg-brown-dark transition-colors mb-3 disabled:opacity-50"
         >
-          {loading ? "Processing..." : (!hasExistingPin ? "Create PIN" : "Verify Access")}
+          {loading ? "Processing..." : (!hasExistingPin ? "Create PIN & Save" : "Verify Access")}
         </button>
 
         <button
