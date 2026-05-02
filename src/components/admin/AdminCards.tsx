@@ -4,7 +4,6 @@ import placeholderImg from "@/assets/Placeholder.jpg";
 import { IconButton } from "@/components/ui/IconButton";
 import { TextField } from "@/components/ui/TextField";
 import type {
-  CategoryType,
   DrinkType,
   SugarLevel,
   ToppingType,
@@ -187,44 +186,4 @@ export const ToppingCard = ({
   </div>
 );
 
-interface CategoryCardProps {
-  category: CategoryType;
-  onEdit: () => void;
-  onDelete: () => void;
-}
 
-export const CategoryCard = ({
-  category,
-  onEdit,
-  onDelete,
-}: CategoryCardProps) => (
-  <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="font-bold text-lg">{category.label}</h3>
-        <p className="text-sm text-gray-600 mt-1">{category.description}</p>
-        <p className="text-xs text-gray-400 mt-1">
-          {category.drinkIds.length} drinks
-        </p>
-      </div>
-      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <IconButton
-          label={`Edit ${category.label}`}
-          onClick={onEdit}
-          variant="ghost"
-          className="h-auto w-auto rounded-full p-2"
-        >
-          <Edit size={18} />
-        </IconButton>
-        <IconButton
-          label={`Delete ${category.label}`}
-          onClick={onDelete}
-          variant="danger"
-          className="h-auto w-auto rounded-full p-2 bg-transparent"
-        >
-          <Trash2 size={18} />
-        </IconButton>
-      </div>
-    </div>
-  </div>
-);
